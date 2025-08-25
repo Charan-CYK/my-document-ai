@@ -291,184 +291,153 @@ const App = () => {
     setChatHistory([]); // Clear chat history
   };
 
-  return (
-    // Main container with a clean, light background and subtle gradient
-    // Added a subtle gradient to the body background for visual interest
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans text-gray-800">
-      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-xl w-full max-w-4xl border border-blue-50">
-        
-        {/* Header Section */}
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2 text-center tracking-tight">
-          Intelligent Assistant
-        </h1>
-        <p className="text-lg sm:text-xl font-medium text-blue-600 mb-8 text-center">
-          Summarize & Chat with Your Documents
-        </p>
+return (
+<div className="app-container">
+  <div className="card-panel">
+    <h1 className="main-heading">Intelligent Assistant</h1>
+    <p className="sub-heading">Summarize & Chat with Your Documents</p>
 
-        {/* Input Section for Summarization */}
-        <div className="mb-8">
-          <label htmlFor="articleContent" className="block text-base font-semibold text-gray-700 mb-3">
-            Paste your Document Content here, or Upload a Document (.txt or .pdf):
-          </label>
-          <div className="flex items-center space-x-4 mb-4">
-            <input
-              type="file"
-              id="fileInput"
-              ref={fileInputRef} // Attach ref to the file input
-              accept=".txt,.pdf" // Accept .txt and .pdf files
-              onChange={handleFileChange}
-              className="block w-full text-sm text-gray-600
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-100 file:text-blue-700
-                hover:file:bg-blue-200 transition-all duration-200 cursor-pointer"
-              disabled={isLoadingSummary}
-            />
-            {articleContent && ( // Show clear button only if content exists
-              <button
-                onClick={clearFileInput}
-                className="px-4 py-2 rounded-full border border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all duration-200 text-sm font-semibold shadow-sm"
-                disabled={isLoadingSummary}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-          <textarea
-            id="articleContent"
-            className="w-full p-4 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition-all duration-200 text-gray-800 h-52 sm:h-72 resize-y shadow-sm"
-            placeholder="Or type/paste your content directly here..."
-            value={articleContent}
-            onChange={(e) => setArticleContent(e.target.value)}
-            disabled={isLoadingSummary} // Disable textarea while summarizing
-          ></textarea>
+    {/* Input Section for Summarization */}
+    <div className="input-section">
+      <label htmlFor="articleContent" className="input-label">
+        Paste your Document Content here, or Upload a Document (.txt or .pdf):
+      </label>
+      <div className="file-input-wrapper">
+        <input
+          type="file"
+          id="fileInput"
+          ref={fileInputRef}
+          accept=".txt,.pdf"
+          onChange={handleFileChange}
+          className="custom-file-input"
+          disabled={isLoadingSummary}
+        />
+        {articleContent && (
+          <button
+            onClick={clearFileInput}
+            className="clear-button"
+            disabled={isLoadingSummary}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+      <textarea
+        id="articleContent"
+        className="text-area-input"
+        placeholder="Or type/paste your content directly here..."
+        value={articleContent}
+        onChange={(e) => setArticleContent(e.target.value)}
+        disabled={isLoadingSummary}
+      ></textarea>
+    </div>
+
+    {/* Summarize Button */}
+    <div className="button-group">
+      <button
+        onClick={handleSummarize}
+        disabled={isLoadingSummary || !articleContent.trim()}
+        className={`summarize-button ${isLoadingSummary || !articleContent.trim() ? 'summarize-button-disabled' : ''}`}
+      >
+        {isLoadingSummary ? (
+          <span className="button-loading-content">
+            <svg className="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Summarizing...
+          </span>
+        ) : (
+          'Summarize Document'
+        )}
+      </button>
+    </div>
+
+    {/* Error Display for Summarization */}
+    {summaryError && (
+      <div className="error-message" role="alert">
+        <strong className="error-bold">Error!</strong>
+        <span className="error-text">{summaryError}</span>
+      </div>
+    )}
+
+    {/* Summary Output Section */}
+    {summary && (
+      <div className="summary-output">
+        <h2 className="summary-heading">Generated Summary:</h2>
+        <p className="summary-content">{summary}</p>
+      </div>
+    )}
+
+    {/* Q&A Section (conditionally rendered if summary exists) */}
+    {summary && (
+      <div className="chat-section">
+        <h2 className="chat-heading">Chat with the Summary</h2>
+
+        {/* Chat History Display */}
+        <div className="chat-history">
+          {chatHistory.length === 0 ? (
+            <p className="chat-placeholder">Ask a question about the summary to start the conversation...</p>
+          ) : (
+            chatHistory.map((msg, index) => (
+              <div key={index} className={`chat-message-wrapper ${msg.role === 'user' ? 'user-message-wrapper' : 'ai-message-wrapper'}`}>
+                <div className={`chat-bubble ${msg.role === 'user' ? 'user-bubble' : 'ai-bubble'}`}>
+                  <p className="chat-text">{msg.text}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
-        {/* Summarize Button */}
-        <div className="flex justify-center mb-8">
-          <button
-            onClick={handleSummarize}
-            disabled={isLoadingSummary || !articleContent.trim()} // Disable button while loading or if no content
-            className={`
-              px-8 py-3 rounded-lg text-white font-semibold text-base tracking-wide
-              transition-all duration-200 ease-in-out transform
-              ${isLoadingSummary || !articleContent.trim()
-                ? 'bg-blue-400 cursor-not-allowed opacity-70' // Lighter blue for disabled
-                : 'bg-blue-700 hover:bg-blue-800 active:bg-blue-900 shadow-lg hover:shadow-xl' // Darker, richer blue for active
+        <div className="chat-input-area">
+          <input
+            type="text"
+            id="userQuestion"
+            className="chat-question-input"
+            placeholder="Ask a follow-up question..."
+            value={userQuestion}
+            onChange={(e) => setUserQuestion(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && userQuestion.trim() && !isLoadingAnswer) {
+                handleAskQuestion();
               }
-            `}
+            }}
+            disabled={isLoadingAnswer}
+          />
+          <button
+            onClick={handleAskQuestion}
+            disabled={isLoadingAnswer || !userQuestion.trim()}
+            className={`send-button ${isLoadingAnswer || !userQuestion.trim() ? 'send-button-disabled' : ''}`}
           >
-            {isLoadingSummary ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Summarizing...
-              </span>
+            {isLoadingAnswer ? (
+              <svg className="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
             ) : (
-              'Summarize Document'
+              'Send'
             )}
           </button>
         </div>
 
-        {/* Error Display for Summarization */}
-        {summaryError && (
-          <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg relative mb-8 shadow-sm" role="alert">
-            <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline ml-2">{summaryError}</span>
+        {/* Error Display for Q&A */}
+        {answerError && (
+          <div className="error-message" role="alert">
+            <strong className="error-bold">Error!</strong>
+            <span className="error-text">{answerError}</span>
           </div>
         )}
-
-        {/* Summary Output Section */}
-        {summary && (
-          <div className="bg-blue-50 p-6 rounded-lg border border-blue-200 shadow-inner mb-8">
-            <h2 className="text-xl font-semibold text-blue-800 mb-4">Generated Summary:</h2>
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-base">{summary}</p>
-          </div>
-        )}
-
-        {/* Q&A Section (conditionally rendered if summary exists) */}
-        {summary && (
-          <div className="mt-10 pt-8 border-t border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-700 mb-5 text-center">Chat with the Summary</h2>
-            
-            {/* Chat History Display */}
-            <div className="bg-white p-4 rounded-lg mb-5 max-h-80 overflow-y-auto border border-blue-100 shadow-md">
-              {chatHistory.length === 0 ? (
-                <p className="text-gray-500 italic text-center text-sm">Ask a question about the summary to start the conversation...</p>
-              ) : (
-                chatHistory.map((msg, index) => (
-                  <div key={index} className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`p-3 rounded-xl max-w-[80%] ${
-                      msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-br-none' // User bubble
-                        : 'bg-blue-50 text-blue-800 rounded-bl-none' // AI bubble (light blue)
-                    } shadow-sm`}>
-                      <p className="text-sm">{msg.text}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="mb-5 flex space-x-3">
-              <input
-                type="text"
-                id="userQuestion"
-                className="flex-grow p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition-all duration-200 text-gray-800 shadow-sm"
-                placeholder="Ask a follow-up question..."
-                value={userQuestion}
-                onChange={(e) => setUserQuestion(e.target.value)}
-                onKeyPress={(e) => { // Allow pressing Enter to ask question
-                  if (e.key === 'Enter' && userQuestion.trim() && !isLoadingAnswer) {
-                    handleAskQuestion();
-                  }
-                }}
-                disabled={isLoadingAnswer} // Disable input while answering
-              />
-              <button
-                onClick={handleAskQuestion}
-                disabled={isLoadingAnswer || !userQuestion.trim()} // Disable button if loading or no question
-                className={`
-                  px-6 py-3 rounded-lg text-white font-semibold text-base
-                  transition-all duration-200 ease-in-out transform
-                  ${isLoadingAnswer || !userQuestion.trim()
-                    ? 'bg-blue-400 cursor-not-allowed opacity-70' // Lighter blue for disabled
-                    : 'bg-blue-700 hover:bg-blue-800 active:bg-blue-900 shadow-md hover:shadow-lg' // Darker, richer blue for active
-                  }
-                `}
-              >
-                {isLoadingAnswer ? (
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  'Send'
-                )}
-              </button>
-            </div>
-
-            {/* Error Display for Q&A */}
-            {answerError && (
-              <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg relative mb-8 shadow-sm" role="alert">
-                <strong className="font-bold">Error!</strong>
-                <span className="block sm:inline ml-2">{answerError}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Instructions/Notes */}
-        <div className="mt-10 pt-6 border-t border-blue-100 text-center text-sm text-gray-500">
-          <p>This tool uses Generative AI to condense documents and provide answers based on the generated summary.</p>
-          <p className="mt-1">Always review the AI's output for accuracy and context, especially in regulated environments.</p>
-        </div>
       </div>
+    )}
+
+    {/* Instructions/Notes */}
+    <div className="instructions-footer">
+      <p>This tool uses Generative AI to condense documents and provide answers based on the generated summary.</p>
+      <p className="mt-1">Always review the AI's output for accuracy and context, especially in regulated environments.</p>
     </div>
-  );
+  </div>
+</div>
+);
 };
 
 export default App;
