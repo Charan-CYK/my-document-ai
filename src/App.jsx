@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 // IMPORTANT: YOUR GEMINI API KEY IS NOW INSERTED HERE
 // This key is visible in your frontend code. For production, consider a backend proxy.
-const API_KEY = "AIzaSyDtI84MW3tfzls8PVKF5GnRsExniG98rUk"; 
+const API_KEY = "AIzaSyBV6u3niiqi2j1deuwTkyVhmvRGj9MMwUU"; 
 
 // Main App component
 const App = () => {
